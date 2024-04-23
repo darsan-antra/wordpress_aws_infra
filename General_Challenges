@@ -1,2 +1,5 @@
-1. Can the aws access keyfile path used in the main.tf file?
-2. How you can use Hashicorp vault or github env variables to solve this problem?
+1. Can the AWS access key file path be used in the main.tf file?
+  Yeah, we can provide the path (~/.aws/config or ~/.aws/credentials) as the value in the aws provider block.
+2. How can you use Hashicorp vault or GitHub env variables to solve this problem?
+  We need to add our secret variables under the security tab of the repo. Those with the collaborator access to the repo can access and use the variables. Pipelines initiated by the forked repos will not have access to the variables.
+  
