@@ -1,0 +1,2 @@
+1. Can the aws access keyfile path used in the main.tf file?
+2. How you can use Hashicorp vault or github env variables to solve this problem?
