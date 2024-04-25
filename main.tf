@@ -10,8 +10,7 @@ terraform {
 
 provider "aws" {
   region = var.region
-  access_key = "AKIA2UC3DAVMYKNG7VUN"
-  secret_key = "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"
+  # Add aws access_key and secret_key
 }
 
 #provider "vault" {
