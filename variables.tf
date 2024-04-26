@@ -35,7 +35,7 @@ variable "private_subnet_cidrs_1b" {
 
 variable "ssh_pubkey_file" {
   description = "path to the ssh key "
-  default = "~/.ssh/aws/aws_key.pub"
+  default     = "~/.ssh/aws/aws_key.pub"
 }
 
 variable "azs" {
@@ -47,16 +47,21 @@ variable "azs" {
 
 variable "autoscale_min" {
   description = "Minimum number of instances"
-  default = "2"
+  default     = "2"
 }
 
 variable "autoscale_max" {
   description = "Maximum number of instances"
-  default = "2"
+  default     = "2"
 }
 
 variable "autoscale_desired" {
   description = "Desried number of healthy instances"
-  default = "2"
+  default     = "2"
+}
+
+variable "launch_config_ec2_ami" {
+  description = "AMI Id of the instance to use while launching"
+  default     = "ami-04e5276ebb8451442"
 }
 
