@@ -439,6 +439,9 @@ resource "aws_autoscaling_attachment" "wordpress_as_attachment" {
 resource "aws_key_pair" "wordpress" {
   public_key = tls_private_key.bastion.public_key_openssh
   key_name   = "wordpress_kp"
+  provisioner "local-exec" {
+    command = "echo '${tls_private_key.bastion.private_key_pem}' > ~/Desktop/private_key.pem"
+  }
 }
 
 resource "tls_private_key" "bastion" {
