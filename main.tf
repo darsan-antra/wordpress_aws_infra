@@ -426,7 +426,7 @@ resource "aws_alb" "wordpress-lb" {
   name               = "wordpress-lb"
   load_balancer_type = "application"
   internal           = false
-  security_groups    = [aws_security_group.load_balancer.id]
+  security_groups    = [aws_security_group.load_balancer.id, aws_security_group.bastion-host-sg.id]
   subnets            = [aws_subnet.private_subnet_1b[0].id, aws_subnet.private_subnet_1a[0].id]
 }
 
