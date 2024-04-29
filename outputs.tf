@@ -6,39 +6,50 @@ output "vpc_id" {
 }
 
 
-output "public_subnet_cidr" {
+output "public_subnet_1a_cidr" {
 
   description = "CIDR range of public subnets in wordpress VPC"
-  value = {
-    for subnet in aws_subnet.public_subnet :
-    subnet.id => subnet.cidr_block
-  }
+  value       = aws_subnet.public_subnet_1a.cidr_block
 }
 
-output "private_subnet_1a_cidr" {
+output "public_subnet_1b_cidr" {
+
+  description = "CIDR range of public subnets in wordpress VPC"
+  value       = aws_subnet.public_subnet_1b.cidr_block
+}
+
+output "private_subnet_1a_1_cidr" {
 
   description = "CIDR block of private subnets in wordpress VPC"
 
-  value = {
-    for subnet in aws_subnet.private_subnet_1a :
-    subnet.id => subnet.cidr_block
-  }
+  value = aws_subnet.private_subnet_1a_1.cidr_block
 }
 
-output "private_subnet_1b_cidr" {
+output "private_subnet_1a_2_cidr" {
+
+  description = "CIDR block of private subnets in wordpress VPC"
+
+  value = aws_subnet.private_subnet_1a_2.cidr_block
+}
+
+output "private_subnet_1b_1_cidr" {
 
   description = "CIDR block of private subnets in wordpress VPC 1b AZ"
 
-  value = {
-    for subnet in aws_subnet.private_subnet_1b :
-    subnet.id => subnet.cidr_block
-  }
+  value = aws_subnet.private_subnet_1b_1.cidr_block
+}
+
+output "private_subnet_1b_2_cidr" {
+
+  description = "CIDR block of private subnets in wordpress VPC 1b AZ"
+
+  value = aws_subnet.private_subnet_1b_2.cidr_block
 }
 
 output "loadbalancer_dns" {
   description = "DNS of the load balancer"
 
-  value = aws_alb.wordpress-lb.dns_name
+  value = aws_lb.wordpress-lb.dns_name
 }
 
 
