@@ -11,6 +11,7 @@ terraform {
 provider "aws" {
   region = var.region
   # Add aws access_key and secret_key
+
 }
 
 #provider "vault" {
@@ -199,41 +200,11 @@ resource "aws_internet_gateway" "igw" {
   }
 }
 
-resource "aws_route_table" "internet_rt" {
-
-  vpc_id = aws_vpc.main_vpc.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
-  }
-  tags = {
-    Name = "Internet Route Table"
-  }
-}
-
-resource "aws_route_table" "private_rt1" {
-  vpc_id = aws_vpc.main_vpc.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_nat_gateway.nat_gateway1.id
-  }
-}
-
-resource "aws_route_table" "private_rt2" {
-  vpc_id = aws_vpc.main_vpc.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_nat_gateway.nat_gateway2.id
-  }
-}
-
 resource "aws_eip" "nat1" {
 
   vpc                       = true
   associate_with_private_ip = "10.0.144.0"
+  depends_on                = [aws_internet_gateway.igw]
 }
 
 resource "aws_eip" "nat2" {
@@ -241,6 +212,7 @@ resource "aws_eip" "nat2" {
   associate_with_private_ip = "10.0.146.0"
   depends_on                = [aws_internet_gateway.igw]
 }
+
 resource "aws_nat_gateway" "nat_gateway1" {
 
   allocation_id = aws_eip.nat1.id
@@ -260,63 +232,45 @@ resource "aws_nat_gateway" "nat_gateway2" {
   }
   depends_on = [aws_eip.nat2]
 }
-resource "aws_security_group" "load_balancer" {
-  name        = "load-balancer_sg"
-  description = "Control access to the load balancer"
-  vpc_id      = aws_vpc.main_vpc.id
 
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+resource "aws_route_table" "internet_rt" {
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+  vpc_id = aws_vpc.main_vpc.id
+  tags = {
+    Name = "Public-internet-rt-table"
   }
 }
 
-resource "aws_security_group" "bastion-host-sg" {
-  name        = "bastion-host_security_group"
-  description = "Allow inbound ssh from any where and outbound ssh into private instances."
-  vpc_id      = aws_vpc.main_vpc.id
+resource "aws_route" "public-internet-rt" {
+  route_table_id         = aws_route_table.internet_rt.id
+  gateway_id             = aws_internet_gateway.igw.id
+  destination_cidr_block = "0.0.0.0/0"
+}
 
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+resource "aws_route_table" "private_rt1" {
+  vpc_id = aws_vpc.main_vpc.id
+  tags = {
+    Name = "Private-nat-route-1"
   }
 }
-resource "aws_security_group" "private_instance_SG" {
-  name        = "wordpress_private_instance_sg"
-  description = "Allow inbound traffic from load-balancer and outbound through NAT and allow local communication."
-  vpc_id      = aws_vpc.main_vpc.id
 
-  ingress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "tcp"
-    security_groups = [aws_security_group.load_balancer.id]
-  }
+resource "aws_route" "nat-rt-1" {
+  route_table_id         = aws_route_table.private_rt1.id
+  gateway_id             = aws_nat_gateway.nat_gateway1.id
+  destination_cidr_block = "0.0.0.0/0"
+}
 
-  ingress {
-    from_port       = 22
-    to_port         = 22
-    protocol        = "tcp"
-    security_groups = [aws_security_group.bastion-host-sg.id]
+resource "aws_route_table" "private_rt2" {
+  vpc_id = aws_vpc.main_vpc.id
+  tags = {
+    Name = "Private-nat-route-2"
   }
+}
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+resource "aws_route" "nat-rt-2" {
+  route_table_id         = aws_route_table.private_rt2.id
+  gateway_id             = aws_nat_gateway.nat_gateway2.id
+  destination_cidr_block = "0.0.0.0/0"
 }
 
 resource "aws_route_table_association" "public_subnet_asso" {
@@ -336,6 +290,75 @@ resource "aws_route_table_association" "private_subnet_1b_asso" {
   subnet_id      = aws_subnet.private_subnet_1b[0].id
 }
 
+resource "aws_security_group" "load_balancer" {
+  name        = "load-balancer_sg"
+  description = "Control access to the load balancer"
+  vpc_id      = aws_vpc.main_vpc.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [aws_subnet.private_subnet_1a[0].cidr_block, aws_subnet.private_subnet_1b[0].cidr_block]
+  }
+}
+
+resource "aws_security_group" "bastion-host-sg" {
+  name        = "bastion-host_security_group"
+  description = "Allow inbound ssh from any where and outbound ssh into private instances."
+  vpc_id      = aws_vpc.main_vpc.id
+
+  ingress {
+    # To allow ssh into bastion host.
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # To allow ssh into private instances from bastion host.
+  egress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [aws_subnet.private_subnet_1a[0].cidr_block, aws_subnet.private_subnet_1b[0].cidr_block]
+  }
+}
+resource "aws_security_group" "private_instance_SG" {
+  name        = "wordpress_private_instance_sg"
+  description = "Allow inbound traffic from load-balancer and outbound through NAT and allow local communication."
+  vpc_id      = aws_vpc.main_vpc.id
+
+  ingress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    security_groups = [aws_security_group.load_balancer.id]
+  }
+
+  ingress {
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
+    security_groups = [aws_security_group.bastion-host-sg.id]
+    cidr_blocks = [aws_subnet.public_subnet[0].cidr_block, aws_subnet.public_subnet[1].cidr_block]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_instance" "bastion" {
   ami           = "ami-04e5276ebb8451442"
   instance_type = "t2.micro"
@@ -344,6 +367,12 @@ resource "aws_instance" "bastion" {
   associate_public_ip_address = true
   security_groups             = [aws_security_group.bastion-host-sg.id]
   subnet_id                   = aws_subnet.public_subnet[0].id
+  provisioner "local-exec" {
+    command = "echo '${tls_private_key.bastion.private_key_pem}' > ./private1_key.pem"
+  }
+  user_data = <<-EOF
+      sudo yum update -y
+  EOF
   tags = {
     Name = "Bastion"
   }
@@ -357,10 +386,12 @@ resource "aws_instance" "private_instance_1a" {
   user_data       = <<-EOF
               #!/bin/bash
               sudo yum update -y
-              sudo yum install -y httpd php php-mysqlnd
-              sudo systemctl start httpd
-              sudo systemctl enable httpd
-              cd /var/www/html
+              sudo yum install docker -y
+              sudo service docker start
+              sudo chmod 666 /var/run/docker.sock
+              docker pull nginx
+              docker tag nginx my-nginx
+              docker run --rm --name nginx-server -d -p 80:80 -t my-nginx
               EOF
 
   tags = {
@@ -373,18 +404,22 @@ resource "aws_instance" "private_instance_1b" {
   instance_type   = "t2.micro"
   security_groups = [aws_security_group.private_instance_SG.id]
   subnet_id       = aws_subnet.private_subnet_1b[0].id
+  key_name = aws_key_pair.wordpress.key_name
   user_data       = <<-EOF
               #!/bin/bash
               sudo yum update -y
-              sudo yum install -y httpd php php-mysqlnd
-              sudo systemctl start httpd
-              sudo systemctl enable httpd
-              cd /var/www/html
+              sudo yum install docker -y
+              sudo service docker start
+              sudo chmod 666 /var/run/docker.sock
+              docker pull nginx
+              docker tag nginx my-nginx
+              docker run --rm --name nginx-server -d -p 80:80 -t my-nginx
               EOF
 
   tags = {
     Name = "Wordpress_instance_private_1b"
   }
+  depends_on = [aws_key_pair.wordpress]
 }
 
 resource "aws_alb" "wordpress-lb" {
@@ -396,11 +431,21 @@ resource "aws_alb" "wordpress-lb" {
 }
 
 resource "aws_alb_target_group" "wordpress-tg" {
-  name     = "wordpress-tg"
-  port     = 80
-  protocol = "HTTP"
+  name        = "wordpress-tg"
+  port        = 80
+  protocol    = "HTTP"
   target_type = "instance"
-  vpc_id   = aws_vpc.main_vpc.id
+  vpc_id      = aws_vpc.main_vpc.id
+
+  health_check {
+    path                = "/"
+    port                = "traffic-port"
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    timeout             = 5
+    interval            = 60
+    matcher             = "200"
+  }
 }
 
 #resource "aws_alb_target_group_attachment" "wordpress" {
@@ -425,22 +470,17 @@ resource "aws_autoscaling_group" "ec2_cluster" {
   min_size             = var.autoscale_min
   max_size             = var.autoscale_max
   desired_capacity     = var.autoscale_desired
+  health_check_type    = "EC2"
   launch_configuration = aws_launch_configuration.wordpress_lb_launch_config.name
   vpc_zone_identifier  = [aws_subnet.private_subnet_1a[0].id, aws_subnet.private_subnet_1b[0].id]
+  target_group_arns    = [aws_alb_target_group.wordpress-tg.arn]
 }
-
-resource "aws_autoscaling_attachment" "wordpress_as_attachment" {
-  autoscaling_group_name = aws_autoscaling_group.ec2_cluster.id
-  lb_target_group_arn    = aws_alb_target_group.wordpress-tg.arn
-}
-
-
 
 resource "aws_key_pair" "wordpress" {
   public_key = tls_private_key.bastion.public_key_openssh
   key_name   = "wordpress_kp"
   provisioner "local-exec" {
-    command = "echo '${tls_private_key.bastion.private_key_pem}' > ~/Desktop/private_key.pem"
+    command = "echo '${tls_private_key.bastion.private_key_pem}' > ./private1_key.pem"
   }
 }
 
@@ -460,17 +500,19 @@ resource "aws_launch_configuration" "wordpress_lb_launch_config" {
   user_data                   = <<-EOL
   #!/bin/bash
   sudo yum -y update
-  sudo yum install -y httpd php php-mysqlnd
-  sudo systemctl start httpd
-  sudo systemctl enable httpd
-  cd /var/www/html
+  sudo yum install -y docker
+  sudo service docker start
+  sudo chmod 666 /var/run/docker.sock
+  docker pull nginx
+  docker tag nginx my-nginx
+  docker run --rm --name nginx-server -d -p 80:80 -t my-nginx
   EOL
   depends_on                  = [aws_nat_gateway.nat_gateway1, aws_nat_gateway.nat_gateway2]
 }
 
-resource "aws_s3_bucket" "wordpressbucket" {
-  bucket = "wordpressbucket"
-  acl = "private"
+resource "aws_s3_bucket" "wordpressbucket1431797test" {
+  bucket = "wordpressbucket1431797test"
+  acl    = "private"
   versioning {
     enabled = true
   }
@@ -478,7 +520,7 @@ resource "aws_s3_bucket" "wordpressbucket" {
 
 resource "aws_cloudfront_distribution" "wordpress_cloudfront" {
   origin {
-    domain_name = aws_s3_bucket.wordpressbucket.bucket_regional_domain_name
+    domain_name = aws_s3_bucket.wordpressbucket1431797test.bucket_regional_domain_name
     origin_id   = "S3Origin"
   }
 
