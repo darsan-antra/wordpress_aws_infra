@@ -85,4 +85,3 @@ variable "aurora_allocated_storage" {
   default     = "10"
 }
 
-
