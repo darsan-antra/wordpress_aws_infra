@@ -56,4 +56,3 @@ output "rds_db_hostname" {
   description = "Database Host of the the wordpress"
   value = aws_db_instance.wordpress_db.address
 }
-
