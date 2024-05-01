@@ -1,58 +1,87 @@
-
-output "vpc_id" {
-
-  description = "ID of the wordpress VPC"
-  value       = aws_vpc.main_vpc.id
+variable "region" {
+  type        = string
+  description = "AWS region"
+  default     = "us-east-1"
 }
 
+variable "project_name" {
 
-output "public_subnet_1a_cidr" {
-
-  description = "CIDR range of public subnets in wordpress VPC"
-  value       = aws_subnet.public_subnet_1a.cidr_block
+  type        = string
+  description = "Name of the project"
+  default     = "wordpress"
 }
 
-output "public_subnet_1b_cidr" {
+variable "public_subnet_cidrs" {
 
-  description = "CIDR range of public subnets in wordpress VPC"
-  value       = aws_subnet.public_subnet_1b.cidr_block
+  type        = list(string)
+  description = "Public Subnet CIDR values"
+  default     = ["10.0.0.0/18", "10.0.64.0/18"]
 }
 
-output "private_subnet_1a_1_cidr" {
+variable "private_subnet_cidrs_1a" {
 
-  description = "CIDR block of private subnets in wordpress VPC"
-
-  value = aws_subnet.private_subnet_1a_1.cidr_block
+  type        = list(string)
+  description = "Private Subnet CIDR values of 1a"
+  default     = ["10.0.144.0/24", "10.0.145.0/24"]
 }
 
-output "private_subnet_1a_2_cidr" {
+variable "private_subnet_cidrs_1b" {
 
-  description = "CIDR block of private subnets in wordpress VPC"
+  type        = list(string)
+  description = "Private Subnet CIDR values of 1b"
+  default     = ["10.0.146.0/24", "10.0.147.0/24"]
 
-  value = aws_subnet.private_subnet_1a_2.cidr_block
 }
 
-output "private_subnet_1b_1_cidr" {
-
-  description = "CIDR block of private subnets in wordpress VPC 1b AZ"
-
-  value = aws_subnet.private_subnet_1b_1.cidr_block
+variable "ssh_pubkey_file" {
+  description = "path to the ssh key "
+  default     = "~/.ssh/aws/aws_key.pub"
 }
 
-output "private_subnet_1b_2_cidr" {
+variable "azs" {
 
-  description = "CIDR block of private subnets in wordpress VPC 1b AZ"
-
-  value = aws_subnet.private_subnet_1b_2.cidr_block
+  type        = list(string)
+  description = "Availability Zones"
+  default     = ["us-east-1a", "us-east-1b"]
 }
 
-output "loadbalancer_dns" {
-  description = "DNS of the load balancer"
-
-  value = aws_lb.wordpress-lb.dns_name
+variable "autoscale_min" {
+  description = "Minimum number of instances"
+  default     = "2"
 }
 
-output "rds_db_hostname" {
-  description = "Database Host of the the wordpress"
-  value = aws_db_instance.wordpress_db.address
+variable "autoscale_max" {
+  description = "Maximum number of instances"
+  default     = "2"
 }
+
+variable "autoscale_desired" {
+  description = "Desired number of healthy instances"
+  default     = "2"
+}
+
+variable "launch_config_ec2_ami" {
+  description = "AMI Id of the instance to use while launching"
+  default     = "ami-04e5276ebb8451442"
+}
+
+variable "aurora_cluster_identifier" {
+  description = "Name to identify the cluster"
+  default     = "wordpress-cluster"
+}
+
+variable "aurora_database_name" {
+  description = "Name of the aurora database"
+  default     = "wordpressdb"
+}
+
+variable "aurora_master_username" {
+  description = "User name to login to the aurora database"
+  default     = "marni4"
+}
+
+variable "aurora_allocated_storage" {
+  description = "Allocated storage type to the aurora db"
+  default     = "10"
+}
+
