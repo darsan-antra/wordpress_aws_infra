@@ -18,3 +18,12 @@
 5. Accessing the application running in private instances through load balancer.
 
     Resolved by adding the public subnet security group to the load balancer to allow internet taffic to the load balancer( attaching internet gateway to the load balancer).
+
+6. Error while creating Aurora-mysql database:
+
+    Error: creating RDS DB Instance (dbwordpress): InvalidParameterCombination: Invalid iops to storage (GB) ratio for engine name aurora-mysql and storage type aurora: 0.0000
+│     status code: 400, request id: 7ddf4e07-1e64-4eb6-9321-d12c55352962
+│
+│   with aws_db_instance.wordpress_db,
+│   on databases.tf line 24, in resource "aws_db_instance" "wordpress_db":
+│   24: resource "aws_db_instance" "wordpress_db" {
