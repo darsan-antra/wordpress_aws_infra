@@ -1,45 +1,58 @@
-variable "aws_access_key" {
 
-	type = string
-	description = "Access key for  AWS CLI"
-	default = "AKIA6ODU7STGTDLX246U"
-}
+output "vpc_id" {
 
-variable "aws_secret_key" {
-	
-	type = string
-	description = "Secret key for AWS CLI"
-	default = "mu/CI2Y7ZXudJGSohsAbTJBzC0lTc+GCOA6TqUxB"
+  description = "ID of the wordpress VPC"
+  value       = aws_vpc.main_vpc.id
 }
 
 
+output "public_subnet_1a_cidr" {
 
-variable "public_subnet_cidrs" {
-
-	type = list(string)
-	description = "Public Subnet CIDR values"
-	default = ["10.0.0.0/18", "10.0.64.0/18"]
+  description = "CIDR range of public subnets in wordpress VPC"
+  value       = aws_subnet.public_subnet_1a.cidr_block
 }
 
-variable "private_subnet_cidrs_1a" {
-	
-	type = list(string)
-	description = "Private Subnet CIDR values of 1a"
-	default = ["10.0.144.0/24", "10.0.145.0/24"]
+output "public_subnet_1b_cidr" {
+
+  description = "CIDR range of public subnets in wordpress VPC"
+  value       = aws_subnet.public_subnet_1b.cidr_block
 }
 
-variable "private_subnet_cidrs_1b" {
+output "private_subnet_1a_1_cidr" {
 
-	type = list(string)
-	description = "Private Subnet CIDR values of 1b"
-	default = ["10.0.146.0/24", "10.0.147.0/24"] 
+  description = "CIDR block of private subnets in wordpress VPC"
 
+  value = aws_subnet.private_subnet_1a_1.cidr_block
 }
 
-variable "azs" {
+output "private_subnet_1a_2_cidr" {
 
-	type = list(string)
-	description = "Availability Zones"
-	default = ["us-east-1a", "us-east-1b"]
+  description = "CIDR block of private subnets in wordpress VPC"
+
+  value = aws_subnet.private_subnet_1a_2.cidr_block
 }
 
+output "private_subnet_1b_1_cidr" {
+
+  description = "CIDR block of private subnets in wordpress VPC 1b AZ"
+
+  value = aws_subnet.private_subnet_1b_1.cidr_block
+}
+
+output "private_subnet_1b_2_cidr" {
+
+  description = "CIDR block of private subnets in wordpress VPC 1b AZ"
+
+  value = aws_subnet.private_subnet_1b_2.cidr_block
+}
+
+output "loadbalancer_dns" {
+  description = "DNS of the load balancer"
+
+  value = aws_lb.wordpress-lb.dns_name
+}
+
+output "rds_db_hostname" {
+  description = "Database Host of the the wordpress"
+  value = aws_db_instance.wordpress_db.address
+}
