@@ -31,9 +31,9 @@ resource "aws_launch_configuration" "wordpress_lb_launch_config" {
   sudo yum install -y docker
   sudo service docker start
   sudo chmod 666 /var/run/docker.sock
-  docker pull nginx
-  docker tag nginx my-nginx
-  docker run --rm --name nginx-server -d -p 80:80 -t my-nginx
+  docker pull wordpress:latest
+  mkdir -p /var/www/html/wordpress
+  docker run --rm --name wordpress -d -p 80:80 -t wordpress:latest
   EOL
   depends_on                  = [aws_nat_gateway.nat_gateway1, aws_nat_gateway.nat_gateway2]
 }

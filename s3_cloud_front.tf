@@ -1,6 +1,6 @@
 
 resource "aws_s3_bucket" "wordpressbucket141797test" {
-  bucket = "wordpressbucket141797test"
+  bucket = "wordpressbucket141798test"
   acl    = "private"
   versioning {
     enabled = true

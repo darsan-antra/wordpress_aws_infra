@@ -56,7 +56,7 @@ variable "autoscale_max" {
 }
 
 variable "autoscale_desired" {
-  description = "Desried number of healthy instances"
+  description = "Desired number of healthy instances"
   default     = "2"
 }
 
@@ -64,4 +64,25 @@ variable "launch_config_ec2_ami" {
   description = "AMI Id of the instance to use while launching"
   default     = "ami-04e5276ebb8451442"
 }
+
+variable "aurora_cluster_identifier" {
+  description = "Name to identify the cluster"
+  default     = "wordpress-cluster"
+}
+
+variable "aurora_database_name" {
+  description = "Name of the aurora database"
+  default     = "wordpressdb"
+}
+
+variable "aurora_master_username" {
+  description = "User name to login to the aurora database"
+  default     = "marni4"
+}
+
+variable "aurora_allocated_storage" {
+  description = "Allocated storage type to the aurora db"
+  default     = "10"
+}
+
 

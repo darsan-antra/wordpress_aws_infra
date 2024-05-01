@@ -7,19 +7,21 @@ resource "aws_lb" "wordpress-lb" {
 }
 
 resource "aws_alb_target_group" "wordpress-tg" {
-  name     = "wordpress-tg"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = aws_vpc.main_vpc.id
+  name        = "wordpress-tg"
+  port        = 80
+  protocol    = "HTTP"
+  target_type = "instance"
+  vpc_id      = aws_vpc.main_vpc.id
 
   health_check {
     path                = "/"
-    port                = "traffic-port"
-    healthy_threshold   = 5
-    unhealthy_threshold = 2
-    timeout             = 2
-    interval            = 60
+    port                = 80
+    healthy_threshold   = 2
+    unhealthy_threshold = 5
+    timeout             = 5
+    interval            = 30
     matcher             = "200"
+    protocol            = "HTTP"
   }
 }
 
