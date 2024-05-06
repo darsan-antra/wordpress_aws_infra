@@ -49,6 +49,7 @@ resource "aws_security_group" "private_instance_SG" {
     to_port         = 0
     protocol        = "-1"
     security_groups = [aws_security_group.load_balancer.id]
+
   }
 
   ingress {
@@ -71,6 +72,12 @@ resource "aws_security_group" "private_instance_SG" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  egress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 resource "aws_security_group" "aws_db_sg" {
@@ -83,5 +90,18 @@ resource "aws_security_group" "aws_db_sg" {
     to_port     = 3306
     protocol    = "tcp"
     cidr_blocks = [aws_subnet.private_subnet_1b_1.cidr_block, aws_subnet.private_subnet_1a_1.cidr_block]
+  }
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [aws_subnet.private_subnet_1a_1.cidr_block, aws_subnet.private_subnet_1b_1.cidr_block]
+  }
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }

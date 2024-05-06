@@ -18,7 +18,7 @@ resource "aws_instance" "bastion" {
 }
 
 resource "aws_launch_configuration" "wordpress_lb_launch_config" {
-  name_prefix     = "wordpress_instance"
+  name            = "wordpress_instance"
   image_id        = var.launch_config_ec2_ami
   instance_type   = "t2.micro"
   security_groups = [aws_security_group.private_instance_SG.id]
@@ -29,6 +29,8 @@ resource "aws_launch_configuration" "wordpress_lb_launch_config" {
   #!/bin/bash -xe
   sudo yum -y update
   sudo yum install -y docker
+  sudo yum install awscli -y
+  sudo aws secretsmanager get-secret-value --secret-id wordpress_kp >test_key.pem
   sudo service docker start
   sudo chmod 666 /var/run/docker.sock
   docker pull wordpress:latest
@@ -39,7 +41,7 @@ resource "aws_launch_configuration" "wordpress_lb_launch_config" {
 }
 
 resource "aws_autoscaling_group" "ec2_cluster" {
-  name                 = "wordpress_auto_scaling"
+  name_prefix          = "wordpress-instance"
   min_size             = var.autoscale_min
   max_size             = var.autoscale_max
   desired_capacity     = var.autoscale_desired

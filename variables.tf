@@ -85,3 +85,8 @@ variable "aurora_allocated_storage" {
   default     = "10"
 }
 
+variable "mysql_pass" {
+  description = "MySQL db root password"
+  default     = "root"
+}
+

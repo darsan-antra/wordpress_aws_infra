@@ -11,5 +11,4 @@ terraform {
 provider "aws" {
   region = var.region
   # Add aws access_key and secret_key
-
 }
