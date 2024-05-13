@@ -113,6 +113,7 @@ resource "aws_launch_configuration" "wordpress_lb_launch_config" {
    * You can have multiple installations in one database if you give each
    * a unique prefix. Only numbers, letters, and underscores please!
    */
+
   $table_prefix = 'wp_';
 
   /**
