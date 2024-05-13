@@ -40,7 +40,6 @@ resource "aws_alb_listener" "ec2_alb_listener" {
   load_balancer_arn = aws_lb.wordpress-lb.arn
   port              = "80"
   protocol          = "HTTP"
-  certificate_arn   = ""
   depends_on        = [aws_alb_target_group.wordpress-tg]
 
   default_action {

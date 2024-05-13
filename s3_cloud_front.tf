@@ -1,6 +1,6 @@
 
-resource "aws_s3_bucket" "wordpressbucket141797test" {
-  bucket = "wordpressbucket141798test"
+resource "aws_s3_bucket" "wordpressbucket1417895test" {
+  bucket = "wordpressbucket141788test"
   acl    = "private"
   versioning {
     enabled = true
@@ -9,7 +9,7 @@ resource "aws_s3_bucket" "wordpressbucket141797test" {
 
 resource "aws_cloudfront_distribution" "wordpress_cloudfront" {
   origin {
-    domain_name = aws_s3_bucket.wordpressbucket141797test.bucket_regional_domain_name
+    domain_name = aws_s3_bucket.wordpressbucket1417895test.bucket_regional_domain_name
     origin_id   = "S3Origin"
   }
 

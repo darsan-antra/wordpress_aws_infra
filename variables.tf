@@ -62,19 +62,27 @@ variable "autoscale_desired" {
 
 variable "launch_config_ec2_ami" {
   description = "AMI Id of the instance to use while launching"
-  default     = "ami-04e5276ebb8451442"
+  default     = "ami-04ff98ccbfa41c9ad"
 }
 
+variable "db_instance_ami" {
+  description = "AMI id of the db instance with preinstalled Apache, MySQL, PHP, Ruby"
+  default     = "ami-05efd9e66ddc3cf4b"
+}
 variable "aurora_cluster_identifier" {
   description = "Name to identify the cluster"
   default     = "wordpress-cluster"
 }
 
-variable "aurora_database_name" {
+variable "database_name" {
   description = "Name of the aurora database"
-  default     = "wordpressdb"
+  default     = "wordpress-db"
 }
 
+variable "secrets_manager_name" {
+  description = "Name of the secret password of the database"
+  default     = "test-db-password1429"
+}
 variable "aurora_master_username" {
   description = "User name to login to the aurora database"
   default     = "marni4"
@@ -88,5 +96,10 @@ variable "aurora_allocated_storage" {
 variable "mysql_pass" {
   description = "MySQL db root password"
   default     = "root"
+}
+
+variable "table_prefix" {
+  description = "table prefix"
+  default = "$table_prefix"
 }
 

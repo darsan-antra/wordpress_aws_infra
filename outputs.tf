@@ -32,6 +32,7 @@ output "private_subnet_1a_2_cidr" {
   value = aws_subnet.private_subnet_1a_2.cidr_block
 }
 
+
 output "private_subnet_1b_1_cidr" {
 
   description = "CIDR block of private subnets in wordpress VPC 1b AZ"

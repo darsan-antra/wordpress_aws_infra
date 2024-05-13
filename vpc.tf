@@ -74,8 +74,8 @@ resource "aws_subnet" "private_subnet_1b_2" {
   }
 }
 
-resource "aws_db_subnet_group" "aurora_subnet_group" {
-  name = "aurora-subnet-group"
+resource "aws_db_subnet_group" "mysql_subnet_group" {
+  name = "mysql-subnet-group"
   subnet_ids = [
     aws_subnet.private_subnet_1a_2.id,
     aws_subnet.private_subnet_1b_2.id,
